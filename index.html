@@ -9,16 +9,313 @@
     <title></title>
 </head>
 <body>
-    <div class="container">
-        <input type="text" id="message" />
-        <input type="button" id="sendmessage" value="Send" />
-        <input type="hidden" id="displayname" />
-        <ul id="discussion"></ul>
+    <div id="koContainer">
+        <div data-role="page" id="demo-page" data-url="demo-page">
+            <div data-role="header" data-theme="b">
+                <h1>Cashflow Bảng kê tài chính</h1>
+                <a href="#left-panel" data-icon="carat-r" data-iconpos="notext" data-shadow="false" data-iconshadow="false" class="ui-nodisc-icon">Open left panel</a>
+            </div><!-- /header -->
+            <div role="main" class="ui-content">
+                <div class="sub-ui-content" id="summary">
+                    <span class="LineHeader"><span>Tổng Quan</span></span>
+                    <table>
+                        <tr>
+                            <td style="width: 40%" class="RightText">Tiền thụ động = </td>
+                            <td style="width: 60%" class="LeftText"><span class="BoldMoney" data-bind="text: formatCurrency(PassiveIncome)" class="Money"></span></td>
+                        </tr>
+                        <tr style="height: 40px">
+                            <td class="RightText"> </td>
+                            <td class="LeftText"> </td>
+                        </tr>
+                        <tr>
+                            <td class="RightText">Tổng thu nhập = </td>
+                            <td class="LeftText"><span class="BoldMoney" data-bind="text: formatCurrency(GetTotalIncome())" class="Money"></td>
+                        </tr>
+                        <tr>
+                            <td class="RightText">Tổng chi phí = </td>
+                            <td class="LeftText"><span class="BoldMoney" data-bind="text: formatCurrency(TotalExps)" class="Money"></td>
+                        </tr>
+                        <tr style="height: 40px">
+                            <td class="RightText"> </td>
+                            <td class="LeftText"> </td>
+                        </tr>
+                        <tr>
+                            <td class="RightText">Tổng nợ = </td>
+                            <td class="LeftText"><span class="BoldMoney RedMoney" data-bind="text: formatCurrency(TotalLoans)" class="Money"></td>
+                        </tr>
+                        <tr>
+                            <td class="RightText">Tiền thực lãnh = </td>
+                            <td class="LeftText"><span class="BoldMoney BigMoney" data-bind="text: formatCurrency(PayCheck)" class="Money"></span></td>
+                        </tr>
+                        <tr style="height: 40px">
+                            <td class="RightText"> </td>
+                            <td class="LeftText"> </td>
+                        </tr>
+                        <tr>
+                            <td class="RightText">Tiền hiện có = </td>
+                            <td class="LeftText"><span class="BoldMoney MoneyInHand" data-bind="text: formatCurrency(MoneyInHand)" class="Money"></span></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="sub-ui-content" id="hoatdong">
+                    <span class="LineHeader">
+                        <span>Hoạt Động</span>
+                        <span class="FloatRight" data-bind="text: formatCurrency(MoneyInHand)" class="Money"></span>
+                    </span>
+                    <table>
+                        <tr data-bind="visible: IsStart">
+                            <td><input class="Money" type="number" placeholder="Tiền bắt đầu" data-bind="value: StartMoney"/></td>
+                            <td><input type="button" class="AddNew" data-bind="click : StartGame" value="Bắt đầu"/></li></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><button class="AddNew" type="button" data-bind="click : GetPayCheck">Lãnh tiền(<span data-bind="text: formatCurrency(PayCheck)"></span>)</button></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><button class="ui-corner-all ui-btn ui-btn-b" data-bind="click : PayCharity">Từ Thiện(<span data-bind="text: formatCurrency(Charity)"></span>)</button></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><button class="ui-corner-all ui-btn ui-btn-b" data-bind="click : PayJobless">Thất Nghiệp(<span data-bind="text: formatCurrency(TotalExps)"></span>)</button></td>
+                        </tr>
+                        <tr>
+                            <td><input class="Money" type="number" placeholder="Tiền kiếm được" data-bind="value: ActionIncome"/></td>
+                            <td><input class="AddNew" type="button" data-bind="click : FIncome" value="Income"/></td>
+                        </tr>
+                        <tr>
+                            <td><input class="Money" type="number" placeholder="Tiền mất đi" data-bind="value: ActionOutcome"/></td>
+                            <td><button class="ui-corner-all ui-btn ui-btn-b" data-bind="click : FOutcome" value="Outcome">Outcome</button></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="sub-ui-content" id="thunhap">
+                    <span class="LineHeader"><span>Thu Nhập</span>
+                    <span class="FloatRight" data-bind="text: formatCurrency(MoneyInHand)" class="Money"></span></span>
+                    <table>
+                        <tr>
+                            <th>Chú thích</th>
+                            <th>Tiền</th>
+                            <th style="width:10%;"><input class="AddNew" type="button" data-bind="event: { click: AddIncome }" value="+" /></th>
+                        </tr>
+                        <tr>
+                            <td><span>Lương</span></td>
+                            <td><input placeholder="Tiền lương" data-bind="value: Salary, event: { change: UpdatePayCheck }" type="number" class="Money"/></td>
+                            <td></td>
+                        </tr>
+                        <tbody data-bind="foreach: { data: Income, as: 'item' }">
+                        <tr>
+                            <td>
+                                <div class="ui-input-text ui-body-inherit ui-corner-all ui-shadow-inset">
+                                    <input placeholder="Tên" data-bind="value: Description"/>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="ui-input-text ui-body-inherit ui-corner-all ui-shadow-inset">
+                                    <input placeholder="Số tiền" type="number" data-bind="value: Cost, event: { change: $root.UpdatePassiveIncome }" class="Money"/>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="ui-btn ui-input-btn ui-corner-all ui-shadow ui-btn-b" >
+                                    -
+                                    <input class="Remove" type="button" data-bind="event: { click: $root.RemoveIncome }" value="" />
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="sub-ui-content" id="chungkhoan">
+                    <span class="LineHeader"><span>Cổ Phiếu</span>
+                    <span class="FloatRight" data-bind="text: formatCurrency(MoneyInHand)" class="Money"></span></span>
+                    <table>
+                        <tr>
+                            <th>Cổ phiếu</th>
+                            <th>Số lượng</th>
+                            <th>Chi phí</th>
+                            <th style="width: 10%"><input class="AddNew" type="button" data-bind="event: { click: AddStockAsset }" value="+" /></th>
+                        </tr>
+                        <tbody data-bind="foreach: { data: StockAsset, as: 'item' }">
+                        <tr>
+                            <td><div class="uppercase ui-input-text ui-body-inherit ui-corner-all ui-shadow-inset"><input placeholder="Tên" data-bind="value: Name"/></div></td>
+                            <td><div class="ui-input-text ui-body-inherit ui-corner-all ui-shadow-inset"><input placeholder="Số lượng" type="number" class="Money" data-bind="value: Quantity"/></div></td>
+                            <td><div class="ui-input-text ui-body-inherit ui-corner-all ui-shadow-inset"><input placeholder="Giá/1CP" type="number" class="Money" data-bind="value: Cost"/></div></td>
+                            <td><div class="ui-btn ui-input-btn ui-corner-all ui-shadow ui-btn-b" >Sell<input class="Remove" type="button" data-bind="event: { click: $root.RemoveStockAsset }" value="Sell" /></div></td>
+                        </tr>
+                        </tbody>
+                        <tr data-bind="visible: IsAddStock">
+                            <td><input data-bind="value: NewStock.Name"/></td>
+                            <td><input type="number" class="Money" data-bind="value: NewStock.Quantity"/></td>
+                            <td><input type="number" class="Money" data-bind="value: NewStock.Cost"/></td>
+                            <td><input class="AddNew" type="button" data-bind="event: { click: $root.AddNewStock }" value="Thêm" /></td>
+                        </tr>
+                    </table>
+                    <div data-bind="visible: IsSaleStock" class="ui-shadow ui-body-inherit SellDialog ui-dialog">
+                        <div data-role="header" data-theme="b">
+                            <h1>Bán cổ phiếu</h1>
+                        </div>
+                        <div class="SellDialogContent">
+                            <div>
+                                <span>Tên cổ phiếu:</span>
+                                <span data-bind="text: SaleStock.Name"></span>
+                            </div>
+                            <div>
+                                <span>Số lượng:<span data-bind="text: SaleStock.Quantity"></span></span>
+
+                                <span>Giá:<span data-bind="text: formatCurrency(SaleStock.Cost)"></span></span>
+
+                            </div>
+                            <div>
+                                <span>Giá bán:</span>
+                                <input type="number" data-bind="value: SaleStock.SellCost, event: { change : CalcStockTotal }" />
+                            </div>
+                            <div>
+                                <span>Thành tiền:</span>
+                                <input disabled="disabled" data-bind="value: formatCurrency(SaleStock.Total)" />
+                            </div>
+                            <div>
+                                <table>
+                                    <tr>
+                                        <td><button class="ui-btn ui-btn-b" data-bind="event: { click: SellStock}">Bán</button></td>
+                                        <td><button class="ui-btn" data-bind="event: { click: CloseSellStock}">Hủy</button></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sub-ui-content" id="batdongsan">
+                    <span class="LineHeader"><span>Bất Động Sản</span>
+                    <span class="FloatRight" data-bind="text: formatCurrency(MoneyInHand)" class="Money"></span></span>
+                    <table>
+                        <tr>
+                            <th>BDS/CTY</th>
+                            <th>Tiền cọc</th>
+                            <th>Chi phí</th>
+                            <th style="width: 10%"><input class="AddNew" type="button" data-bind="event: { click: AddBusinessAsset }" value="+" /></th>
+                        </tr>
+                        <tbody data-bind="foreach: { data: BusinessAsset, as: 'item' }">
+                        <tr>
+                            <td><div class="ui-input-text ui-body-inherit ui-corner-all ui-shadow-inset"><input data-bind="value: Name"/></div></td>
+                            <td><div class="ui-input-text ui-body-inherit ui-corner-all ui-shadow-inset"><input type="number" class="Money" data-bind="value: DownPayment"/></div></td>
+                            <td><div class="ui-input-text ui-body-inherit ui-corner-all ui-shadow-inset"><input type="number" class="Money" data-bind="value: Cost"/></div></td>
+                            <td><div class="ui-btn ui-input-btn ui-corner-all ui-shadow ui-btn-b" >Sell<input class="Remove" type="button" data-bind="event: { click: $root.RemoveBusinessAsset }" value="Sell" /></div></td>
+                        </tr>
+                        </tbody>
+                        <tr data-bind="visible: IsAddBusiness">
+                            <td><input data-bind="value: NewBusiness.Name"/></td>
+                            <td><input type="number" class="Money" data-bind="value: NewBusiness.DownPayment"/></td>
+                            <td><input type="number" class="Money" data-bind="value: NewBusiness.Cost"/></td>
+                            <td><input class="AddNew" type="button" data-bind="event: { click: $root.AddNewBusiness }" value="Thêm" /></td>
+                        </tr>
+                    </table>
+                    <div data-bind="visible: IsSaleBusiness" class="ui-shadow ui-body-inherit SellDialog ui-dialog">
+                        <div data-role="header" data-theme="b">
+                            <h1>Bán bất động sản</h1>
+                        </div>
+                        <div class="SellDialogContent">
+                            <div>
+                                <span>Tên bất động sản:</span>
+                                <span data-bind="text: SaleBusiness.Name"></span>
+                            </div>
+                            <div>
+                                <span>Trả trước:<span data-bind="text: formatCurrency(SaleBusiness.DownPayment)"></span></span>
+                                <span>Giá:<span data-bind="text: formatCurrency(SaleBusiness.Cost)"></span></span>
+                            </div>
+                            <div>
+                                <span>Giá bán:</span>
+                                <input type="number" data-bind="value: SaleBusiness.SellCost, event: { change : CalcBusinessTotal }" />
+                            </div>
+                            <div>
+                                <span>Thành tiền:</span>
+                                <input disabled="disabled" data-bind="value: formatCurrency(SaleBusiness.Total)" />
+                            </div>
+                            <div>
+                                <table>
+                                    <tr>
+                                        <td><button class="ui-btn ui-btn-b" data-bind="event: { click: SellBusiness}">Bán</button></td>
+                                        <td><button class="ui-btn" data-bind="event: { click: CloseSellBusiness}">Hủy</button></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sub-ui-content" id="concai">
+                    <span class="LineHeader"><span>Con Cái</span>
+                    <span class="FloatRight" data-bind="text: formatCurrency(MoneyInHand)" class="Money"></span></span>
+                    <table>
+                        <tr>
+                            <td style="width: 30%">Số con:</td>
+                            <td style="width: 50%"><span data-bind="text: NumberOfChild" class="Number"></span></td>
+                            <td style="width: 10%"><input class="AddNew" type="button" data-bind="event: { click: AddChild }" value="+" /></td>
+                            <td style="width: 10%"><button class="Remove ui-btn ui-input-btn ui-btn-b ui-corner-all ui-shadow" data-bind="event: { click: RemoveChild }" value="-" >-</button></td>
+                        </tr>
+                        <tr>
+                            <td>Chi phí:</td>
+                            <td colspan="3"><input data-bind="value: CostPerChild" type="number" class="Number Money" /></td>
+                        </tr>
+                        <tr>
+                            <td>Tổng chi phí:</td>
+                            <td colspan="3"><span data-bind="text: formatCurrency(Loans()[7]().Expenses)" class="Number"></span></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="sub-ui-content" id="chiphi">
+                    <span class="LineHeader"><span>Chi Phí</span>
+                    <span class="FloatRight" data-bind="text: formatCurrency(MoneyInHand)" class="Money"></span></span>
+                    <table class="Expenses">
+                        <tbody data-bind="foreach: { data: Loans, as: 'item' }">
+                        <!-- ko if: Expenses >= 0 && ID != 9  -->
+                        <tr>
+                            <td><span data-bind="text: ExpName"></span></td>
+                            <td><input type="number" data-bind="value: Expenses, event: { change: $root.GetTotalExp }" class="Money"/></td>
+                        </tr>
+                        <!-- /ko -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="sub-ui-content" id="no">
+                    <span class="LineHeader"><span>Tiền Nợ</span>
+                    <span class="FloatRight" data-bind="text: formatCurrency(MoneyInHand)" class="Money"></span></span>
+                    <table class="Liabilities">
+                        <tbody data-bind="foreach: { data: Loans, as: 'item' }">
+                        <!-- ko if: Liabilities >= 0 -->
+                        <tr>
+                            <td><span data-bind="text: LiaName"></span></td>
+                            <td>
+
+                                <input type="number" data-bind="value: Liabilities, event: { change: $root.GetTotalLoan }" class="Money"/>
+
+                            </td>
+                            <!-- ko if: ID != 9 -->
+                            <td><input class="AddNew" type="button" data-bind="event: { click: $root.PayLoan }" value="Pay" /></td>
+                            <!-- /ko -->
+                        </tr>
+                        <!-- /ko -->
+                        </tbody>
+                    </table>
+                </div>
+            </div><!-- /content -->
+            <div data-role="panel" id="left-panel" style="position: absolute; top: 0; bottom: 0;" data-theme="b">
+                <form>
+                    <fieldset data-role="controlgroup">
+                        <button type="button" data-rel="close" href="#summary" class="ui-btn">Tổng quan</button>
+                        <button type="button" data-rel="close" href="#hoatdong" class="ui-btn">Hoạt Động</button>
+                        <button type="button" data-rel="close" href="#thunhap" class="ui-btn">Thu Nhập</button>
+                        <button type="button" data-rel="close" href="#chungkhoan" class="ui-btn">Cổ phiếu</button>
+                        <button type="button" data-rel="close" href="#batdongsan" class="ui-btn">Bất động sản</button>
+                        <button type="button" data-rel="close" href="#concai" class="ui-btn">Con cái</button>
+                        <button type="button" data-rel="close" href="#chiphi" class="ui-btn">Chi Phí</button>
+                        <button type="button" data-rel="close" href="#no" class="ui-btn">Tiền Nợ</button>
+                    </fieldset>
+                </form>
+            </div><!-- /panel -->
+        </div>
+        <link href="mobile.css" type="text/css" rel="stylesheet">
+        <link href="jquery.mobile.custom.structure.min.css" type="text/css" rel="stylesheet">
+        <link href="jquery.mobile.custom.theme.min.css" type="text/css" rel="stylesheet">
+        <script language="JavaScript" src="jquery-1.11.1.min.js"></script>
+        <script language="JavaScript" src="jquery.mobile.custom.min.js"></script>
+        <script language="JavaScript" src="knockout.js"></script>
+        <script language="JavaScript" src="Model.js"></script>
     </div>
-    <link href="jquery.mobile.custom.structure.min.css" type="text/css" rel="stylesheet">
-    <link href="jquery.mobile.custom.theme.min.css" type="text/css" rel="stylesheet">
-    <script language="JavaScript" src="jquery-1.11.1.min.js"></script>
-    <script language="JavaScript" src="jquery.mobile.custom.min.js"></script>
-    
 </body>
 </html>
